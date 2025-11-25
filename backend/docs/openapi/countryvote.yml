@@ -1,0 +1,77 @@
+---
+openapi: 3.0.1
+info:
+  title: API V1
+  version: v1
+paths:
+  "/api/v1/countries/top":
+    get:
+      summary: Returns top countries by vote count
+      tags:
+      - Countries
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        description: Number of results to return
+        example: 10
+        schema:
+          type: integer
+      - name: search
+        in: query
+        required: false
+        description: Search term for filtering
+        example: United
+        schema:
+          type: string
+      responses:
+        '200':
+          description: empty state
+  "/api/v1/countries":
+    get:
+      summary: Returns list of all countries
+      tags:
+      - Countries
+      responses:
+        '200':
+          description: countries list returned
+  "/api/v1/votes":
+    post:
+      summary: Creates a vote
+      tags:
+      - Votes
+      parameters: []
+      responses:
+        '201':
+          description: vote created
+        '409':
+          description: user has already voted
+        '422':
+          description: invalid country code
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                vote:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: John Doe
+                    email:
+                      type: string
+                      example: john@example.com
+                    country_code:
+                      type: string
+                      example: USA
+                  required:
+                  - name
+                  - email
+                  - country_code
+servers:
+- url: https://{defaultHost}
+  variables:
+    defaultHost:
+      default: www.example.com

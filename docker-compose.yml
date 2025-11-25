@@ -1,0 +1,86 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${DATABASE_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+      POSTGRES_DB: ${DATABASE_NAME:-countryvote_development}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: bash -c "rm -f tmp/pids/server.pid && echo 'Running database migrations...' && bin/rails db:prepare && echo 'Migrations complete. Starting server...' && rails server -b 0.0.0.0"
+    volumes:
+      - ./backend:/app
+      - bundle_cache:/usr/local/bundle
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_USERNAME: ${DATABASE_USERNAME:-postgres}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+      DATABASE_NAME: ${DATABASE_NAME:-countryvote_development}
+      REDIS_URL: redis://redis:6379/0
+      REDIS_CACHE_URL: redis://redis:6379/1
+      REST_COUNTRIES_API_URL: ${REST_COUNTRIES_API_URL:-https://restcountries.com/v3.1}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+      RAILS_ENV: development
+      RAILS_LOG_LEVEL: ${RAILS_LOG_LEVEL:-info}
+    depends_on:
+      - db
+      - redis
+
+  sidekiq:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: bundle exec sidekiq
+    volumes:
+      - ./backend:/app
+      - bundle_cache:/usr/local/bundle
+    environment:
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_USERNAME: ${DATABASE_USERNAME:-postgres}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+      DATABASE_NAME: ${DATABASE_NAME:-countryvote_development}
+      REDIS_URL: redis://redis:6379/0
+      REDIS_CACHE_URL: redis://redis:6379/1
+      REST_COUNTRIES_API_URL: ${REST_COUNTRIES_API_URL:-https://restcountries.com/v3.1}
+      RAILS_ENV: development
+    depends_on:
+      - db
+      - redis
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+  redis_data:
+  bundle_cache:
+

@@ -1,0 +1,3 @@
+Loading skeletons: Single page applications usually include loading skeletons to avoid showing the user empty pages or incomplete data.
+Aria label: The aria label was left due to the time requirement, usually included on the applications to allow readers and accesibility tools to work correctly.
+Cypress tests: Testing the UI with cypress or playwright is a good improvement to any frontend application. Was not included due to the time and the complexity to integrate.

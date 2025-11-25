@@ -1,0 +1,3 @@
+- Security: Wanted to include the rack-attack gem to configure a limit of requests per minute and protect the application against attacks.
+- CI/CD: Rails 8 provide a powerful local CI that can be included on the local pipeline for ensuring the application guidelines and formatting. Couldn't be included due to the time.
+- Sidekiq scheduler: Allows the automatic queue of jobs, useful for refreshing the cache and other jobs that needs recurrent run.

@@ -1,0 +1,1 @@
+The countries API is stable and don't need further validation
